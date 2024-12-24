@@ -1,0 +1,9 @@
+info: Listening on 4000
+info: GET en /api/loggerTest - 21:26:58
+info: GET en /loggerTest - 21:26:58
+debug: Este es un log de debug
+http: Este es un log de http
+info: Este es un log de info
+warning: Este es un log de warning
+error: Este es un log de error
+info: GET en /favicon.ico - 21:26:58

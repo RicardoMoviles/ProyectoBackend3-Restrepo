@@ -1,0 +1,39 @@
+{
+  "name": "plantilladocumentacion",
+  "type": "commonjs",
+  "version": "1.0.0",
+  "main": "./src/app.js",
+  "scripts": {
+    "start": "node src/app.js --mode production",
+    "dev": "nodemon src/app.js --mode development",
+    "start:dev": "node --watch src/app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@faker-js/faker": "^9.2.0",
+    "@fakerjs/faker": "^3.0.0",
+    "artillery-plugin-metrics-by-endpoint": "^1.15.0",
+    "bcrypt": "^5.1.0",
+    "commander": "^12.1.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.2",
+    "express-compression": "^1.0.2",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.7.5",
+    "multer": "^1.4.5-lts.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "chai": "^4.5.0",
+    "mocha": "^10.1.0",
+    "nodemon": "^3.1.7",
+    "supertest": "^7.0.0"
+  },
+  "description": ""
+}
