@@ -21,11 +21,9 @@ const generateMockUser = async () => {
 
 // Función para generar múltiples usuarios mockeados
 const generateMockUsers = async (numUsers) => {
-    const users = [];
-    for (let i = 0; i < numUsers; i++) {
-        const user = await generateMockUser();
-        users.push(user);
-    }
+    const users = await Promise.all(
+        Array.from({ length: numUsers }, () => generateMockUser())
+    );
     return users;
 };
 
