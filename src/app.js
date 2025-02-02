@@ -11,6 +11,8 @@ const { handleError } = require('./middleware/handleError.middleware.js')
 const { logger } = require('./utils/logger.js')
 const { addLogger} = require('./middleware/logger.middleware.js')
 // importaciones de swagger 
+const swaggerJsDoc = require('swagger-jsdoc')
+const swaggerUiExpress = require('swagger-ui-express')
 
 
 const app = express() 
@@ -25,6 +27,20 @@ app.use(cookieParser())
 app.use(cors())
 app.use(addLogger)
 
+const swaggerOptions = {
+    definition: {
+        openapi: "3.0.1",
+        info: {
+            title: 'Documentación de app web de adopción de mascotas',
+            description: 'Api para un app de mascotas'
+        }
+    },
+    apis: [`${__dirname}/docs/**/*.yaml`] // dirección de nuestros documentos para  nuestros endpoint
+}
+
+
+const specs = swaggerJsDoc(swaggerOptions)
+app.use('/apidocs', swaggerUiExpress.serve, swaggerUiExpress.setup(specs))
 
 /* These lines of code are setting up routes in your Express application. */
 app.use(appRouter)
