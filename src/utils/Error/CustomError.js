@@ -4,7 +4,8 @@ class CustomError {
         error.name = name
         error.cause = cause
         error.code = code
-        throw error  // romper nuestro server
+        //throw error  // romper nuestro server
+        return error; // Solo devolvemos el error para que lo manejes en otro lugar
     }
 }
 

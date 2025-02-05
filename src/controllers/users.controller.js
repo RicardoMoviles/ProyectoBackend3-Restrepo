@@ -21,32 +21,36 @@ const getAllUsers = async (req, res) => {
     }
 }
 
-const getUser = async (req, res) => {
+const getUser = async (req, res, next) => {
     try {
         const userId = req.params.uid;
-        req.logger.info(`Fetching user with ID: ${userId}`);  // Log de inicio para obtener un usuario
+        req.logger.info(`Fetching user with ID: ${userId}`);
+
         const user = await usersService.getUserById(userId);
         if (!user) {
-            req.logger.warn(`User not found with ID: ${userId}`);  // Log de advertencia si no se encuentra el usuario
-            return CustomError.createError({
-                name: 'User Not Found',
+            req.logger.warn(`User not found with ID: ${userId}`);
+            // Ahora, en vez de lanzar el error, lo pasamos a `next`
+            return next(CustomError.createError({
+                name: 'UserNotFound',
                 cause: `User ID: ${userId}`,
                 message: 'User not found.',
                 code: EError.NOT_FOUND_ERROR
-            });
+            }));
         }
-        req.logger.info(`Fetched user with ID: ${userId}`);  // Log de éxito
-        res.send({ status: "success", payload: user });
+
+        req.logger.info(`Fetched user with ID: ${userId}`);
+        return res.status(200).send({ status: "success", payload: user });
     } catch (error) {
-        req.logger.error(`Error fetching user: ${error.message}`);  // Log de error
-        CustomError.createError({
+        req.logger.error(`Error fetching user: ${error.message}`);
+        // De nuevo, pasamos el error a `next`
+        return next(CustomError.createError({
             name: 'Database Error',
-            cause: error,
+            cause: error.message,
             message: 'Error fetching the user from the database.',
             code: EError.DATABASE_ERROR
-        });
+        }));
     }
-}
+};
 
 const createUser = async (req, res, next) => {
     try {
@@ -55,28 +59,25 @@ const createUser = async (req, res, next) => {
 
         if (!first_name || !last_name || !email) {
             req.logger.warn('Incomplete data for user creation');  // Log de advertencia si los datos son incompletos
-            return CustomError.createError({
+            // Pasar el error al middleware de manejo de errores
+            return next(CustomError.createError({
                 name: 'User creation error',
-                cause: generateUserInfo({
-                    first_name,
-                    last_name,
-                    email
-                }),
+                cause: generateUserInfo({ first_name, last_name, email }),
                 message: 'Error typing to create user',
                 code: EError.INVALID_TYPE_ERROR
-            });
+            }));
         }
 
         // Verificar si el usuario ya existe
         const existingUser = await usersService.getUserByEmail(email);
         if (existingUser) {
             req.logger.warn(`User already exists with email: ${email}`);  // Log de advertencia si el usuario ya existe
-            return CustomError.createError({
+            return next(CustomError.createError({
                 name: 'Duplicate User',
                 cause: `User with email: ${email}`,
                 message: 'User already exists.',
                 code: EError.ALREADY_EXISTS_ERROR
-            });
+            }));
         }
 
         const newUser = {

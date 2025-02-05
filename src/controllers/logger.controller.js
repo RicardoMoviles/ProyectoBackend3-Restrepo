@@ -5,7 +5,7 @@ const loggerTest = (req, res) => {
     logger.debug("Este es un log de debug");
     logger.http("Este es un log de http");
     logger.info("Este es un log de info");
-    logger.warning("Este es un log de warning");
+    logger.warn("Este es un log de warning");
     logger.error("Este es un log de error");
     logger.fatal("Este es un log de fatal");
 
