@@ -38,6 +38,47 @@ paths:
         "500":
           description: Error al crear la mascota
 
+  # Actualizar una mascota
+  /api/pets/{id}:
+    put:
+      summary: Actualiza una mascota por su ID
+      tags:
+        - Pets
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/requestBodies/updatePet'
+      responses:
+        "200":
+          description: Mascota actualizada con éxito
+        "404":
+          description: Mascota no encontrada
+
+  # Eliminar una mascota
+    delete:
+      summary: Elimina una mascota por su ID
+      tags:
+        - Pets
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Mascota eliminada con éxito
+        "404":
+          description: Mascota no encontrada
+
   # Registro de usuario
   /api/sessions/register:
     post:
@@ -55,6 +96,36 @@ paths:
           description: Usuario registrado con éxito
         "400":
           description: Error en los datos proporcionados
+
+   # Login de usuario
+  /api/sessions/login:
+    post:
+      summary: Inicia sesión de un usuario existente
+      tags:
+        - Sessions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/requestBodies/loginUser'
+      responses:
+        "200":
+          description: Usuario logueado con éxito
+        "400":
+          description: Error en los datos proporcionados
+
+  # Obtener usuario actual
+  /api/sessions/current:
+    get:
+      summary: Obtiene el usuario autenticado
+      tags:
+        - Sessions
+      responses:
+        "200":
+          description: Usuario autenticado encontrado
+        "401":
+          description: No autorizado (usuario no autenticado)
 
   # Adopción
   /api/adoptions/{uid}/{pid}:
@@ -80,6 +151,33 @@ paths:
           description: Adopción realizada con éxito
         "400":
           description: Error en los parámetros proporcionados
+  # Obtener todas las adopciones
+  /api/adoptions:
+    get:
+      summary: Obtiene una lista de todas las adopciones
+      tags:
+        - Adoptions
+      responses:
+        "200":
+          description: Lista de adopciones encontrada
+
+  # Obtener una adopción por ID
+  /api/adoptions/{id}:
+    get:
+      summary: Obtiene una adopción por su ID
+      tags:
+        - Adoptions
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Adopción encontrada
+        "404":
+          description: Adopción no encontrada
 
 components:
   schemas:
@@ -154,6 +252,7 @@ components:
         pets: ["60f85a3f8b8c4e301f89b7b3", "60f85a3f8b8c4e301f89b7b4"]
 
   requestBodies:
+  #Request de Users
     createUser:
       type: object
       properties:
@@ -175,6 +274,20 @@ components:
         email: "fedeuserapi@gmail.com"
         password: "123456"
 
+    loginUser:
+      type: object
+      properties:
+        email:
+          type: string
+          description: Correo electrónico del usuario
+        password:
+          type: string
+          description: Contraseña del usuario
+      example:
+        email: "fedeuserapi@gmail.com"
+        password: "123456"
+
+#Request de Pets
     createPet:
       type: object
       properties:
@@ -196,3 +309,29 @@ components:
         specie: "Perro"
         birthDate: "2020-05-15"
         image: "https://example.com/imagen.jpg"
+
+    updatePet:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre de la mascota
+        specie:
+          type: string
+          description: Especie de la mascota
+        birthDate:
+          type: string
+          format: date
+          description: Fecha de nacimiento de la mascota
+        adopted:
+          type: boolean
+          description: Indica si la mascota ha sido adoptada
+        image:
+          type: string
+          description: URL de la imagen de la mascota
+      example:
+        name: "Rex"
+        specie: "Perro"
+        birthDate: "2017-05-12"
+        adopted: true
+        image: "https://example.com/rex.jpg"
