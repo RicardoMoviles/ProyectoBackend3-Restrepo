@@ -14,6 +14,9 @@ exports.handleError = (err, req, res, next) => {
         
         case EError.DATABASE_ERROR:
             return res.status(500).send({ status: 'error', error: err.message });
+
+        case EError.ALREADY_EXISTS_ERROR:
+            return res.status(403).send({ status: 'error', error: err.message });
         
         default:
             return res.status(500).send({ status: 'error', error: 'Internal Server Error' });

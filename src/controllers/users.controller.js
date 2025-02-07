@@ -89,29 +89,41 @@ const createUser = async (req, res, next) => {
 
         const result = await usersService.create(newUser);
         req.logger.info(`User created successfully: ${JSON.stringify(result)}`);  // Log de éxito al crear el usuario
-        res.send({ status: "success", message: "User created" });
+        res.send({ status: "success", message: "User created", payload: result._id });
     } catch (error) {
         req.logger.error(`Error creating user: ${error.message}`);  // Log de error
         next(error);
     }
 }
 
-const updateUser = async (req, res) => {
+const updateUser = async (req, res, next) => {
     const updateBody = req.body;
     const userId = req.params.uid;
 
     req.logger.info(`Updating user with ID: ${userId}`);  // Log de inicio de la actualización
 
-    const user = await usersService.getUserById(userId);
-    if (!user) {
-        req.logger.warn(`User not found with ID: ${userId}`);  // Log de advertencia si no se encuentra el usuario
-        return res.status(404).send({ status: "error", error: "User not found" });
-    }
+    try {
+        const user = await usersService.getUserById(userId);
+        if (!user) {
+            req.logger.warn(`User not found with ID: ${userId}`);  // Log de advertencia si no se encuentra el usuario
+            // Ahora, pasamos el error al middleware de manejo de errores
+            return next(CustomError.createError({
+                name: 'UserNotFound',
+                cause: `User ID: ${userId}`,
+                message: 'User not found.',
+                code: EError.NOT_FOUND_ERROR
+            }));
+        }
 
-    const result = await usersService.update(userId, updateBody);
-    req.logger.info(`User updated successfully with ID: ${userId}`);  // Log de éxito al actualizar
-    res.send({ status: "success", message: "User updated" });
-}
+        const result = await usersService.update(userId, updateBody);
+        req.logger.info(`User updated successfully with ID: ${userId}`);  // Log de éxito al actualizar
+        res.send({ status: "success", message: "User updated" });
+    } catch (error) {
+        req.logger.error(`Error updating user: ${error.message}`);  // Log de error
+        // Pasar el error al middleware de manejo de errores
+        next(error);
+    }
+};
 
 const deleteUser = async (req, res) => {
     const userId = req.params.uid;
