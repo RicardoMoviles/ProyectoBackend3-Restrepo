@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "main": "./src/app.js",
   "scripts": {
-    "start": "node src/app.js --mode production",
+    "start": "node src/app.js",
     "dev": "nodemon src/app.js --mode development",
     "start:dev": "node --watch src/app.js",
     "test": "mocha test/supertest.test.js"
