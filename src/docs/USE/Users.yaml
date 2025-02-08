@@ -178,6 +178,101 @@ paths:
           description: Adopción encontrada
         "404":
           description: Adopción no encontrada
+  # USUARIOS
+  /api/users:
+    get:
+      summary: Obtiene todos los usuarios
+      tags:
+        - Users
+      responses:
+        "200":
+          description: Lista de usuarios encontrada
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        "500":
+          description: Error en la base de datos
+    post:
+      summary: Crea un nuevo usuario
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/requestBodies/createUser'
+      responses:
+        "201":
+          description: Usuario creado con éxito
+        "400":
+          description: Error al crear el usuario, datos incompletos o incorrectos
+        "409":
+          description: El correo electrónico ya está en uso
+  /api/users/{uid}:
+    get:
+      summary: Obtiene un usuario por su ID
+      tags:
+        - Users
+      parameters:
+        - name: uid
+          in: path
+          required: true
+          description: ID del usuario a obtener
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Usuario encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "404":
+          description: Usuario no encontrado
+    put:
+      summary: Actualiza un usuario por su ID
+      tags:
+        - Users
+      parameters:
+        - name: uid
+          in: path
+          required: true
+          description: ID del usuario a actualizar
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/requestBodies/UpdateUser'
+      responses:
+        "200":
+          description: Usuario actualizado con éxito
+        "400":
+          description: Error al actualizar el usuario
+        "404":
+          description: Usuario no encontrado
+    delete:
+      summary: Elimina un usuario por su ID
+      tags:
+        - Users
+      parameters:
+        - name: uid
+          in: path
+          required: true
+          description: ID del usuario a eliminar
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Usuario eliminado con éxito
+        "404":
+          description: Usuario no encontrado
 
 components:
   schemas:
@@ -273,6 +368,22 @@ components:
         last_name: "Osandón"
         email: "fedeuserapi@gmail.com"
         password: "123456"
+
+    UpdateUser:
+      type: object
+      properties:
+        first_name:
+          type: string
+          description: Nombre del usuario
+        last_name:
+          type: string
+          description: Apellido del usuario
+        email:
+          type: string
+          description: Correo electrónico del usuario
+        password:
+          type: string
+          description: Contraseña del usuario
 
     loginUser:
       type: object

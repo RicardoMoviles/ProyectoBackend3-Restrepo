@@ -2,9 +2,6 @@ const chai = require('chai');
 const supertest = require('supertest');
 const expect = chai.expect;
 const requester = supertest('http://localhost:8080');
-const mongoose = require('mongoose')
-
-mongoose.connect('mongodb://127.0.0.1:27017/c72830')
 
 describe('Testing Users API', () => {
 
@@ -109,8 +106,6 @@ describe('Testing Users API', () => {
 
     describe('DELETE /api/users/:uid', () => {
         it('Debe eliminar un usuario correctamente', async () => {
-            const userId = '676b92f09b2851d107e0819a';  // Asegúrate de que este ID exista
-
             const { statusCode, body } = await requester.delete(`/api/users/${createdUserId}`);
 
             expect(statusCode).to.equal(200);
@@ -257,3 +252,118 @@ describe('Testing Pets API', () => {
     });
 
 });
+
+describe('Testing Adoptions API', () => {
+    let createdUserId;  // Variable para almacenar el _id del usuario creado
+    let createdPetId;   // Variable para almacenar el _id de la mascota creada
+    let createdAdoptionId;
+
+    //Crear un usuario y una mascota para pruebas previas
+    before(async () => {
+        const newUser = {
+            first_name: 'Juan',
+            last_name: 'Pérez',
+            email: 'juanperez@gmail.com',
+            password: '123456'
+        };
+        const { body } = await requester.post('/api/users').send(newUser);
+        createdUserId = body.payload;
+
+        const newPet = {
+            name: 'Firulais',
+            specie: 'Dog',
+            birthDate: '2020-01-01'
+        };
+        const petResponse = await requester.post('/api/pets').send(newPet);
+        createdPetId = petResponse.body.payload._id;
+    });
+
+    describe('POST /api/adoptions/:uid/:pid', () => {
+        it('Debe crear una adopción correctamente', async () => {
+            const { statusCode, body } = await requester
+                .post(`/api/adoptions/${createdUserId}/${createdPetId}`);
+
+            expect(statusCode).to.equal(200);
+            expect(body.status).to.equal('success');
+            expect(body.message).to.equal('Pet adopted');
+            createdAdoptionId = body.payload._id;
+        });
+
+        it('Debe devolver un error 404 si el usuario no existe', async () => {
+            const nonExistentUserId = '676b92f09b2851d107e08194';  // ID inexistente
+            const { statusCode, body } = await requester
+                .post(`/api/adoptions/${nonExistentUserId}/${createdPetId}`);
+
+            expect(statusCode).to.equal(404);
+            expect(body.status).to.equal('error');
+            expect(body.error).to.include('user Not found');
+        });
+
+        it('Debe devolver un error 404 si la mascota no existe', async () => {
+            const nonExistentPetId = '676b92f09b2851d107e08197';  // ID inexistente
+            const { statusCode, body } = await requester
+                .post(`/api/adoptions/${createdUserId}/${nonExistentPetId}`);
+
+            expect(statusCode).to.equal(404);
+            expect(body.status).to.equal('error');
+            expect(body.error).to.include('Pet not found');
+        });
+
+        it('Debe devolver un error 400 si la mascota ya está adoptada', async () => {
+            // Adoptar la mascota una vez
+            await requester.post(`/api/adoptions/${createdUserId}/${createdPetId}`);
+
+            // Intentar adoptar la misma mascota de nuevo
+            const { statusCode, body } = await requester
+                .post(`/api/adoptions/${createdUserId}/${createdPetId}`);
+
+            expect(statusCode).to.equal(400);
+            expect(body.status).to.equal('error');
+            expect(body.error).to.include('Pet is already adopted');
+        });
+    });
+
+    describe('GET /api/adoptions', () => {
+        it('Debe devolver todas las adopciones correctamente', async () => {
+            const { statusCode, body } = await requester.get('/api/adoptions');
+
+            expect(statusCode).to.equal(200);
+            expect(body.status).to.equal('success');
+            expect(body.payload).to.be.an('array');
+            expect(body.payload.length).to.be.greaterThan(0);
+        });
+    });
+
+    describe('GET /api/adoptions/:aid', () => {
+        it('Debe devolver una adopción por su ID', async () => {
+            const { statusCode, body } = await requester.get(`/api/adoptions/${createdAdoptionId}`);
+
+            expect(statusCode).to.equal(200);
+            expect(body.status).to.equal('success');
+            expect(body.payload).to.have.property('owner');
+            expect(body.payload).to.have.property('pet');
+        });
+
+        it('Debe devolver un error 404 si la adopción no existe', async () => {
+            const nonExistentAdoptionId = '676b92f09b2851d107e08197';  // ID inexistente
+            const { statusCode, body } = await requester.get(`/api/adoptions/${nonExistentAdoptionId}`);
+
+            expect(statusCode).to.equal(404);
+            expect(body.status).to.equal('error');
+            expect(body.error).to.include('Adoption not found');
+        });
+    });
+
+    // Limpiar solo al final de todas las pruebas
+    after(async () => {
+        // Eliminar adopción
+        await requester.delete(`/api/adoptions/${createdAdoptionId}`);
+
+        // Eliminar mascota
+        await requester.delete(`/api/pets/${createdPetId}`);
+
+        // Eliminar usuario
+        await requester.delete(`/api/users/${createdUserId}`);
+    });
+});
+

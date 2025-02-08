@@ -16,7 +16,7 @@ const getAdoption = async (req, res) => {
 
     if (!adoption) return res.status(404).send({ status: "error", error: "Adoption not found" });
     
-    res.send({ status: "success", payload: adoption });
+    res.status(200).send({ status: "success", payload: adoption });
 };
 
 
@@ -30,12 +30,27 @@ const createAdoption = async(req,res)=>{
     user.pets.push(pet._id);
     await usersService.update(user._id,{pets:user.pets})
     await petsService.update(pet._id,{adopted:true,owner:user._id})
-    await adoptionsService.create({owner:user._id,pet:pet._id})
-    res.send({status:"success",message:"Pet adopted"})
+    const result = await adoptionsService.create({owner:user._id,pet:pet._id})
+    res.send({status:"success", payload: result, message:"Pet adopted"})
 }
+
+// Eliminar adopción
+const deleteAdoption = async (req, res) => {
+    const adoptionId = req.params.aid;
+
+    try {
+        const adoption = await adoptionsService.delete(adoptionId);  // Utiliza el método delete heredado
+        if (!adoption) return res.status(404).send({ status: "error", error: "Adoption not found" });
+
+        res.status(200).send({ status: "success", message: "Adoption deleted" });
+    } catch (error) {
+        res.status(500).send({ status: "error", error: error.message });
+    }
+};
 
 module.exports = {
     createAdoption,
     getAllAdoptions,
-    getAdoption
+    getAdoption,
+    deleteAdoption
 }
